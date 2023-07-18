@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="b57f9040-d940-4ed6-a879-0294d9b07874" />
+	<flow name="18thaprildemoFlow" doc:id="68ef9ba9-fa79-4d9e-bd51-3bc7f10439ce" >
+		<http:listener doc:name="Listener" doc:id="9d51e6e2-ca48-4751-9995-4fa6930bb5a0" config-ref="HTTP_Listener_config" path="/add"/>
+		<validation:is-number doc:name="Is number" doc:id="a6e4e5b6-cb1b-4e69-abf0-b0fb64b0567b" config-ref="Validation_Config" value="#[payload.x]" numberType="DOUBLE" message="variable x is not a number"/>
+		<validation:is-number numberType="DOUBLE" doc:name="Is number" doc:id="6f00e03c-e518-46d5-8695-a17b0001da0c" value="#[payload.y]" message="variable y is not a number"/>
+		<ee:transform doc:name="Transform Message" doc:id="a2ea5623-1fab-4555-8f5a-e6bfcf58a305" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if(payload.operation == "sum")
+    payload.operation ++ " " ++ payload.x ++ " and " ++ payload.y ++ " is " ++ payload.x + payload.y
+   
+  else if(payload.operation == "mul")
+  payload.operation ++ " " ++ payload.x ++ " and " ++ payload.y ++ " is " ++ payload.x * payload.y
+  else if(payload.operation == "sub") 
+  payload.operation ++ " " ++ payload.x ++ " and " ++ payload.y ++ " is " ++ payload.x - payload.y
+  else if(payload.operation == "div") 
+  payload.operation ++ " " ++ payload.x ++ " and " ++ payload.y ++ " is " ++ payload.x / payload.y
+  else if(payload.operation == "")
+  "provide operation to perform"
+  else "enter valid operation"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="18thaprildemoFlow1" doc:id="9eb9a4c7-8d7b-4d03-b1c6-9369944582c2" >
+		<http:listener doc:name="Listener" doc:id="6cc52037-2f91-44be-af5f-ccb2a3cd0f14" config-ref="HTTP_Listener_config" path="/date"/>
+		<ee:transform doc:name="Transform Message" doc:id="70fabded-8aaa-4cb3-aa6f-7fb46d0a0f1b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+
+output application/json
+---
+payload."date" as DateTime {format: "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX"} as String {format: "EEEE,ddMMMMyyyy"}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
